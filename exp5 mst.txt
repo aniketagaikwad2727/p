@@ -1,0 +1,113 @@
+class Graph:
+    def __init__(self, vertices):
+        self.V = vertices
+        self.graph = []  # For Kruskal (Edge list)
+        self.adj_list = {i: [] for i in range(vertices)}  # For Prim
+        self.adj_matrix = [[0]*vertices for _ in range(vertices)]
+
+    def add_edge(self, u, v, w):
+        self.graph.append([u, v, w])
+        self.adj_list[u].append((v, w))
+        self.adj_list[v].append((u, w))
+        self.adj_matrix[u][v] = w
+        self.adj_matrix[v][u] = w
+
+    def display_adjacency_list(self, node_names):
+        print("\nAdjacency List:")
+        for u in range(self.V):
+            print(f"{node_names[u]} ->", [(node_names[v], w) for v, w in self.adj_list[u]])
+
+    def display_adjacency_matrix(self, node_names):
+        print("\nAdjacency Matrix:")
+        print("     " + "  ".join(f"{name}" for name in node_names))
+        for i in range(self.V):
+            row = "  ".join(f"{self.adj_matrix[i][j]:2}" for j in range(self.V))
+            print(f"{node_names[i]}  {row}")
+
+    # Kruskal's Algorithm
+    def kruskal_mst(self):
+        parent = list(range(self.V))
+
+        def find(i):
+            if parent[i] != i:
+                parent[i] = find(parent[i])
+            return parent[i]
+
+        def union(i, j):
+            a = find(i)
+            b = find(j)
+            parent[a] = b
+
+        self.graph.sort(key=lambda x: x[2])
+        result = []
+        cost = 0
+
+        for u, v, w in self.graph:
+            if find(u) != find(v):
+                result.append((u, v, w))
+                cost += w
+                union(u, v)
+
+        return result, cost
+
+    # Prim's Algorithm
+    def prim_mst(self):
+        import heapq
+        visited = [False] * self.V
+        min_heap = [(0, 0, -1)]  # (weight, vertex, parent)
+        result = []
+        cost = 0
+
+        while min_heap:
+            w, u, parent = heapq.heappop(min_heap)
+            if visited[u]:
+                continue
+            visited[u] = True
+            if parent != -1:
+                result.append((parent, u, w))
+                cost += w
+            for v, weight in self.adj_list[u]:
+                if not visited[v]:
+                    heapq.heappush(min_heap, (weight, v, u))
+
+        return result, cost
+
+# ------------------- User Input Section -------------------
+print("Enter number of departments (nodes):")
+n = int(input())
+print("Enter names of departments:")
+node_names = [input(f"Department {i+1}: ") for i in range(n)]
+
+g = Graph(n)
+
+print("\nEnter number of links (edges):")
+e = int(input("Number of connections (edges): "))
+print("Enter connections as: Department1_index Department2_index Distance")
+print("(Index starts from 0 to", n-1, ")")
+
+for _ in range(e):
+    u, v, w = map(int, input("Enter u v weight: ").split())
+    g.add_edge(u, v, w)
+
+# ------------------- Display -------------------
+g.display_adjacency_list(node_names)
+g.display_adjacency_matrix(node_names)
+
+# ------------------- Kruskal's Algorithm -------------------
+print("\nMinimum Spanning Tree using Kruskal’s Algorithm:")
+kruskal_result, kruskal_cost = g.kruskal_mst()
+for u, v, w in kruskal_result:
+    print(f"{node_names[u]} - {node_names[v]}: {w}")
+print("Total Cost:", kruskal_cost)
+
+# ------------------- Prim's Algorithm -------------------
+print("\nMinimum Spanning Tree using Prim’s Algorithm:")
+prim_result, prim_cost = g.prim_mst()
+for u, v, w in prim_result:
+    print(f"{node_names[u]} - {node_names[v]}: {w}")
+print("Total Cost:", prim_cost)
+
+
+
+
+

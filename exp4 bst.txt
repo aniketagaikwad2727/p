@@ -1,0 +1,199 @@
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.left = None
+        self.right = None
+
+class BST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, root, key):
+        if root is None:
+            return Node(key)
+        if key == root.key:
+            print("Duplicate key! Insertion skipped.")
+        elif key < root.key:
+            root.left = self.insert(root.left, key)
+        else:
+            root.right = self.insert(root.right, key)
+        return root
+
+    def search(self, root, key):
+        if root is None or root.key == key:
+            return root
+        if key < root.key:
+            return self.search(root.left, key)
+        return self.search(root.right, key)
+
+    def find_min(self, root):
+        while root.left:
+            root = root.left
+        return root
+
+    def delete(self, root, key):
+        if root is None:
+            return root
+        if key < root.key:
+            root.left = self.delete(root.left, key)
+        elif key > root.key:
+            root.right = self.delete(root.right, key)
+        else:
+            # Node with 0 or 1 child
+            if root.left is None:
+                return root.right
+            elif root.right is None:
+                return root.left
+            # Node with 2 children
+            min_node = self.find_min(root.right)
+            root.key = min_node.key
+            root.right = self.delete(root.right, min_node.key)
+        return root
+
+    def inorder(self, root):
+        if root:
+            self.inorder(root.left)
+            print(root.key, end=" ")
+            self.inorder(root.right)
+
+    def preorder(self, root):
+        if root:
+            print(root.key, end=" ")
+            self.preorder(root.left)
+            self.preorder(root.right)
+
+    def postorder(self, root):
+        if root:
+            self.postorder(root.left)
+            self.postorder(root.right)
+            print(root.key, end=" ")
+
+    def depth(self, root):
+        if root is None:
+            return 0
+        return 1 + max(self.depth(root.left), self.depth(root.right))
+
+    def mirror(self, root):
+        if root:
+            root.left, root.right = self.mirror(root.right), self.mirror(root.left)
+        return root
+
+    def copy_tree(self, root):
+        if root is None:
+            return None
+        new_root = Node(root.key)
+        new_root.left = self.copy_tree(root.left)
+        new_root.right = self.copy_tree(root.right)
+        return new_root
+
+    def display_parents(self, root):
+        if root:
+            if root.left or root.right:
+                print(f"Parent: {root.key} ->", end=" ")
+                if root.left:
+                    print(f"Left: {root.left.key}", end=" ")
+                if root.right:
+                    print(f"Right: {root.right.key}", end=" ")
+                print()
+            self.display_parents(root.left)
+            self.display_parents(root.right)
+
+    def display_leaf_nodes(self, root):
+        if root:
+            if not root.left and not root.right:
+                print(root.key, end=" ")
+            self.display_leaf_nodes(root.left)
+            self.display_leaf_nodes(root.right)
+
+    def level_order(self, root):
+        if not root:
+            return
+        queue = [root]
+        while queue:
+            current = queue.pop(0)
+            print(current.key, end=" ")
+            if current.left:
+                queue.append(current.left)
+            if current.right:
+                queue.append(current.right)
+
+# ---- User Interface ----
+def menu():
+    print("\n--- Binary Search Tree Operations ---")
+    print("1. Insert")
+    print("2. Delete")
+    print("3. Search")
+    print("4. Display (Inorder/Preorder/Postorder)")
+    print("5. Display Depth of Tree")
+    print("6. Display Mirror Image")
+    print("7. Create a Copy of Tree")
+    print("8. Display Parent Nodes with Children")
+    print("9. Display Leaf Nodes")
+    print("10. Display Tree Level-wise")
+    print("11. Exit")
+
+bst = BST()
+root = None
+copied_root = None
+
+while True:
+    menu()
+    choice = input("Enter your choice (1-11): ")
+
+    if choice == '1':
+        val = int(input("Enter value to insert: "))
+        root = bst.insert(root, val)
+
+    elif choice == '2':
+        val = int(input("Enter value to delete: "))
+        root = bst.delete(root, val)
+
+    elif choice == '3':
+        val = int(input("Enter value to search: "))
+        found = bst.search(root, val)
+        print("Found!" if found else "Not found.")
+
+    elif choice == '4':
+        print("Inorder Traversal: ", end="")
+        bst.inorder(root)
+        print("\nPreorder Traversal: ", end="")
+        bst.preorder(root)
+        print("\nPostorder Traversal: ", end="")
+        bst.postorder(root)
+        print()
+
+    elif choice == '5':
+        print("Depth of Tree:", bst.depth(root))
+
+    elif choice == '6':
+        root = bst.mirror(root)
+        print("Mirror image generated. Inorder Traversal: ", end="")
+        bst.inorder(root)
+        print()
+
+    elif choice == '7':
+        copied_root = bst.copy_tree(root)
+        print("Copy created. Inorder of copied tree: ", end="")
+        bst.inorder(copied_root)
+        print()
+
+    elif choice == '8':
+        print("Parent nodes and their children:")
+        bst.display_parents(root)
+
+    elif choice == '9':
+        print("Leaf nodes: ", end="")
+        bst.display_leaf_nodes(root)
+        print()
+
+    elif choice == '10':
+        print("Level-wise display: ", end="")
+        bst.level_order(root)
+        print()
+
+    elif choice == '11':
+        print("Exiting.")
+        break
+
+    else:
+        print("Invalid choice. Try again.")
